@@ -41,7 +41,7 @@ const userSchema = new Schema(
         },
         photo: {
             type: String,
-            default: "https://w7.pngwing.com/pngs/178/595/png-transparent-user-profile-computer-icons-login-user-avatars-thumbnail.png"
+            default: "https://cdn.ostad.app/images/default_avatar.png"
         },
         address: {
             address: {

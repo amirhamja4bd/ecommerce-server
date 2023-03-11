@@ -67,9 +67,11 @@ exports.addItemToCart = async (req, res) => {
       const cartItem = { product: productId, quantity, price: product.price };
       cart.items.push(cartItem);
     }
-
+    
     cart.calculateSubTotal();
     await cart.save();
+
+    
 
     return res.status(200).json(cart);
   } catch (error) {
@@ -80,7 +82,7 @@ exports.addItemToCart = async (req, res) => {
 
 exports.getCart = async (req, res) => {
   try {
-    const cart = await Cart.findOne({ user: req.user._id });
+    const cart = await Cart.findOne({ user: req.user._id }).populate("items.product").populate("user")
     if (!cart) {
       return res.status(404).json({ message: 'Cart not found' });
     }

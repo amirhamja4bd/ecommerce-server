@@ -15,6 +15,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(helmet());
 
+
 // Routes Middleware
 readdirSync("./routes").map(r => app.use("/api/v1", require(`./routes/${r}`)))
 

@@ -1,6 +1,7 @@
 const fs =require("fs");
 const slugify =require("slugify");
 const Product = require("../models/ProductModel");
+const mongoose = require("mongoose");
 
 // Product Create
 exports.create = async (req, res) => {
@@ -40,6 +41,29 @@ exports.create = async (req, res) => {
 
     await product.save();
     res.json(product);
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json(err.message);
+  }
+};
+
+exports.duplicate = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.json({ error: "Product not found" });
+    }
+    // create duplicate product
+    const newProduct = new Product({
+      ...product.toObject(),
+      _id: mongoose.Types.ObjectId(),
+      slug: slugify(product.title) + "-" + Math.random().toString(36).substring(7), sku: product.sku + Math.floor(Math.random() * 99),
+      status: "Published",
+    });
+    // save duplicate product
+    await newProduct.save();
+    res.json(newProduct);
   } catch (err) {
     console.log(err);
     return res.status(400).json(err.message);
@@ -145,17 +169,64 @@ exports.remove = async (req, res) => {
   }
 };
 
+// // Products Filter
+// exports.filteredProducts = async (req, res) => {
+//   try {
+//     const { checked, radio } = req.body;
+
+//     let filter = {};
+//   if (checked.length > 0) {filter.category = {$in: checked}};
+//     if (radio.length) filter.price = { $gte: radio[0], $lte: radio[1] };
+
+//     const products = await Product.find(filter)
+//     .populate("category")
+//     .populate("brand")
+//     console.log( products.length);
+
+//     res.json(products);
+//   } 
+//   catch (err) {
+//     console.log(err);
+//   }
+// };
 // Products Filter
+
+// exports.filteredProducts = async (req, res) => {
+//   try {
+//     const { checked } = req.body;
+//     const { min, max } = req.query;
+
+//     let filter = {};
+//     if (checked && checked.length > 0) {
+//       filter.category = { $in: checked };
+//     }
+//     if (min && max) {
+//       filter.price = { $gte: min, $lte: max };
+//     }
+
+//     const products = await Product.find(filter)
+//       .populate("category")
+//       .populate("brand");
+//     console.log(products.length);
+
+//     res.json(products);
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
+
 exports.filteredProducts = async (req, res) => {
   try {
     const { checked, radio } = req.body;
 
-    let args = {};
-    if (checked.length > 0) args.category = checked;
-    if (radio.length) args.unitPrice = { $gte: radio[0], $lte: radio[1] };
+    let filter = {};
+  if (checked.length > 0) {filter.category = {$in: checked}};
+    if (radio.length) filter.price = { $gte: radio[0], $lte: radio[1] };
 
-    const products = await Product.find(args);
-    console.log("filtered products query => ", products.length);
+    const products = await Product.find(filter)
+    .populate("category")
+    .populate("brand")
+    console.log( products.length);
 
     res.json(products);
   } 
@@ -167,7 +238,7 @@ exports.filteredProducts = async (req, res) => {
 // List Products
 exports.listProducts = async (req, res) => {
   try {
-    const perPage = 1;
+    const perPage = 9;
     const page = req.params.page ? req.params.page : 1;
 
     const products = await Product.find({})

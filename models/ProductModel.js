@@ -42,8 +42,8 @@ const productSchema = new Schema(
         },
         status: {
             type: String,
-            default: "draft",
-            enum: ['draft', 'published',]
+            default: "Published",
+            enum: ['Draft', 'Published',]
         },
         unit: {
             type: String,
