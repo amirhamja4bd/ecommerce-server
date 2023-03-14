@@ -65,7 +65,6 @@ exports.login = async (req, res ) =>{
         return res.json({error:"Password must be at least 6 characters "})
     }
     const user = await User.findOne({email});
-    console.log('Address', user.address.address)
     if(!user){
         return res.json({error:"User Not Found"})
     }
@@ -73,7 +72,7 @@ exports.login = async (req, res ) =>{
     if(!match){
         return res.json({error:"Wrong password"})
     }
-    const token = jwt.sign({ _id: user._id , email: user.email, role: user.role, photo: user.photo , address: user.address , role: user.role }, process.env.JWT_SECRET_KEY, { expiresIn: "7d", } );
+    const token = jwt.sign({ _id: user._id , email: user.email, role: user.role, photo: user.photo  , role: user.role }, process.env.JWT_SECRET_KEY, { expiresIn: "7d", } );
     
     res.json({
         user: {
@@ -84,7 +83,6 @@ exports.login = async (req, res ) =>{
             email: user.email,
             photo: user.photo,
             role: user.role,
-            address: user.address
 
         },
         token

@@ -52,7 +52,9 @@ exports.allReviews = async (req, res) => {
 exports.getReviewById = async (req, res) => {
   try {
     const { productId } = req.params;
-    const review = await Review.find({ product: productId });
+    const review = await Review.find({ product: productId })
+    .populate({ path: 'user', select: '-photo -password' })
+    .populate({ path: 'product', select: '-photo' });
     if (!review) {
       return res.status(404).json({ message: 'Review not found' });
     }
@@ -61,6 +63,7 @@ exports.getReviewById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // Delete a review by ID
 exports.deleteReview = async (req, res) => {

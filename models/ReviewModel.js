@@ -22,7 +22,7 @@ const reviewSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            default: "waiting-approval",
+            default: "approved",
             enum: ["waiting-approval","rejected", "approved"]
         },
         photo: {

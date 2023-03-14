@@ -6,7 +6,7 @@ const router = express.Router();
 router.post('/cart', isSignIn, addItemToCart);
 router.get('/carts', isSignIn, getCart);
 router.put('/cart', isSignIn, updateCartItem);
-router.delete('/cart', isSignIn, deleteCartItem);
+router.delete('/cart/:itemId', isSignIn, deleteCartItem);
 router.post('/checkout', isSignIn, checkout);
 
 module.exports = router;

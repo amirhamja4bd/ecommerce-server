@@ -55,3 +55,16 @@ exports.findByProductId = async (req, res) => {
     return res.status(500).json({ message: 'Server Error' });
   }
 };
+
+exports.deleteWish = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedWishList = await WishList.findByIdAndDelete(id);
+    if (!deletedWishList) {
+      return res.status(404).json({ message: 'WishItem not found' });
+    }
+    res.status(200).json({ message: 'WishItem deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

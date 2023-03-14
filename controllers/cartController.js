@@ -82,7 +82,7 @@ exports.addItemToCart = async (req, res) => {
 
 exports.getCart = async (req, res) => {
   try {
-    const cart = await Cart.findOne({ user: req.user._id }).populate("items.product").populate("user")
+    const cart = await Cart.findOne({ user: req.user._id }).populate({path:"items.product", select:"-photo"}).populate({path:"user", select:"-password -photo"})
     if (!cart) {
       return res.status(404).json({ message: 'Cart not found' });
     }
@@ -119,7 +119,7 @@ exports.updateCartItem = async (req, res) => {
 
 exports.deleteCartItem = async (req, res) => {
   try {
-    const { itemId } = req.body;
+    const { itemId } = req.params;
     const cart = await Cart.findOne({ user: req.user._id });
     if (!cart) {
       return res.status(404).json({ message: 'Cart not found' });
@@ -167,7 +167,7 @@ exports.checkout = async (req, res) => {
     });
     await order.save();
 
-    // Decrement product quantity
+    // Decrement product quantity And Increment Sold
     for (const item of cart.items) {
       const product = await Product.findById(item.product);
       if (product) {

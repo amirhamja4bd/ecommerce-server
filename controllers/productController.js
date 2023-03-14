@@ -169,52 +169,69 @@ exports.remove = async (req, res) => {
   }
 };
 
-// // Products Filter
-// exports.filteredProducts = async (req, res) => {
-//   try {
-//     const { checked, radio } = req.body;
 
-//     let filter = {};
-//   if (checked.length > 0) {filter.category = {$in: checked}};
-//     if (radio.length) filter.price = { $gte: radio[0], $lte: radio[1] };
 
-//     const products = await Product.find(filter)
-//     .populate("category")
-//     .populate("brand")
-//     console.log( products.length);
 
-//     res.json(products);
-//   } 
-//   catch (err) {
-//     console.log(err);
-//   }
-// };
+
+
 // Products Filter
+exports.filterProducts = async (req, res) => {
+try {
+  const { minPrice, maxPrice, category, brand, bestSell, keyword, sort, page, perPage, } = req.query;
 
-// exports.filteredProducts = async (req, res) => {
-//   try {
-//     const { checked } = req.body;
-//     const { min, max } = req.query;
+  const filter = {};
+  if (minPrice && maxPrice) {
+    filter.price = { $gte: minPrice, $lte: maxPrice };
+  }
+  if (category) {
+    filter.category = category;
+  }
+  if (brand) {
+    filter.brand = brand;
+  }
+  if (bestSell) {
+    filter.sold = { $gte: 10 }; // Display products that have sold at least 10 units.
+  }
+  if (keyword) {
+    filter.$or = [
+      { title: { $regex: keyword, $options: 'i' } },
+      { description: { $regex: keyword, $options: 'i' } },
+    ];
+  }
 
-//     let filter = {};
-//     if (checked && checked.length > 0) {
-//       filter.category = { $in: checked };
-//     }
-//     if (min && max) {
-//       filter.price = { $gte: min, $lte: max };
-//     }
+  const sortOptions = {};
+  if (sort === 'price_asc') {
+    sortOptions.price = 1;
+  } else if (sort === 'price_desc') {
+    sortOptions.price = -1;
+  } else if (sort === 'date_asc') {
+    sortOptions.createdAt = 1;
+  } else if (sort === 'date_desc') {
+    sortOptions.createdAt = -1;
+  } else if (sort === 'popular_product') {
+    sortOptions.sold = -1;
+  }
 
-//     const products = await Product.find(filter)
-//       .populate("category")
-//       .populate("brand");
-//     console.log(products.length);
+  const totalProducts = await Product.countDocuments(filter);
+  const totalPages = Math.ceil(totalProducts / perPage);
 
-//     res.json(products);
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
+  const products = await Product.find(filter)
+    .select("-photo")
+    .populate({ path: "category", select: "-photo" })
+    .populate({ path: "brand", select: "-photo" })
+    .sort(sortOptions)
+    .skip((page - 1) * perPage)
+    .limit(perPage);
 
+  res.json({ products, totalPages });
+} catch (err) {
+  console.error(err.message);
+  res.status(500).send('Server Error');
+}
+};
+
+
+// Products Filtered
 exports.filteredProducts = async (req, res) => {
   try {
     const { checked, radio } = req.body;
@@ -238,7 +255,7 @@ exports.filteredProducts = async (req, res) => {
 // List Products
 exports.listProducts = async (req, res) => {
   try {
-    const perPage = 9;
+    const perPage = 8;
     const page = req.params.page ? req.params.page : 1;
 
     const products = await Product.find({})
