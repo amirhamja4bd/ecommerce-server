@@ -1,5 +1,5 @@
 const express = require('express');
-const { register, login, profileUpdate, recoverVerifyEmail, recoverVerifyOTP, recoverResetPass, getUser } = require('../controllers/userController');
+const { register, login, profileUpdate, recoverVerifyEmail, recoverVerifyOTP, recoverResetPass, getUser, photo, password, addressUpdate } = require('../controllers/userController');
 const { isSignIn, isAdmin } = require('../middlewares/authMiddleware');
 const formidable =require("express-formidable");
 
@@ -9,6 +9,7 @@ const router = express.Router();
 router.post('/register', register)
 router.post('/login', login)
 router.put('/profile', isSignIn ,  formidable(), profileUpdate)
+router.put('/password', isSignIn , formidable(), password)
 router.get('/user', isSignIn , getUser)
 
 // Password Forgot

@@ -4,7 +4,7 @@ const User = require("../models/UserModel");
 
 exports.isSignIn = (req, res, next) => {
   try {
-    console.log(req.headers.authorization)
+    // console.log(req.headers.authorization)
     const decoded = jwt.verify(
       req.headers.authorization, process.env.JWT_SECRET_KEY
     );

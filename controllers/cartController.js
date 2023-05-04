@@ -4,44 +4,7 @@ const Order = require('../models/OrderModel');
 
 
 
-// // Add a product to a user's cart
-// exports.addItemToCart = async (req, res) => {
-//   const { productId, quantity } = req.body;
-//   try {
-//     const cart = await Cart.findOne({ user: req.user._id });
-//     if (!cart) {
-//       return res.status(404).json({ message: 'Cart not found' });
-//     }
-//     const product = await Product.findById(productId);
-//     if (!product) {
-//       return res.status(404).json({ message: 'Product not found' });
-//     }
-//     const existingItemIndex = cart.items.findIndex(
-//       item => item.product.toString() === productId
-//     );
-//     if (existingItemIndex !== -1) {
-//       cart.items[existingItemIndex].quantity += parseInt(quantity);
-//       cart.items[existingItemIndex].calculateSubTotal();
-//     } else {
-//       const item = {
-//         product: productId,
-//         quantity: parseInt(quantity),
-//         price: product.price,
-//       };
-//       item.calculateSubTotal();
-//       cart.items.push(item);
-//     }
-//     cart.calculateSubTotal();
-//     await cart.save();
-//     res.json(cart);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: 'Server error' });
-//   }
-// };
-
-
-
+// Add a product to a user's cart
 
 exports.addItemToCart = async (req, res) => {
   try {
@@ -143,48 +106,182 @@ exports.deleteCartItem = async (req, res) => {
   }
 };
 
-exports.checkout = async (req, res) => {
-  try {
-    const { paymentMethod, shippingFee, shippingMethod, tax } = req.body;
-    const cart = await Cart.findOne({ user: req.user._id });
-    if (!cart) {
-      return res.status(404).json({ message: 'Cart not found' });
-    }
+// exports.checkout = async (req, res) => {
+//   try {
+//     const { shippingFee, shippingMethod, tax , nonce } = req.body;
+//     const cart = await Cart.findOne({ user: req.user._id });
+//     if (!cart) {
+//       return res.status(404).json({ message: 'Cart not found' });
+//     }
 
-    if (cart.items.length === 0) {
-      return res.status(400).json({ message: 'Cart is empty' });
-    }
+//     if (cart.items.length === 0) {
+//       return res.status(400).json({ message: 'Cart is empty' });
+//     }
 
-    // Create an order
-    const order = new Order({
-      user: req.user._id,
-      products: cart.items,
-      total: cart.total,
-      paymentMethod,
-      shippingFee,
-      shippingMethod,
-      tax,
-    });
-    await order.save();
+//     let newTransaction = gateway.transaction.sale(
+//       {
+//         amount: cart.total,
+//         paymentMethod: nonce,
+//         user: req.user._id,
+//         products: cart.items,
+//         shippingFee,
+//         shippingMethod,
+//         tax,
+//         options: {
+//           submitForSettlement: true,
+//         },
+//       },
+//       function (error, result) {
+//         if (result) {
+//           // res.send(result);
+//           // create order
+//           const order = new Order({
+//             products: cart,
+//             payment: result,
+//             buyer: req.user._id,
+//           }).save();
 
-    // Decrement product quantity And Increment Sold
-    for (const item of cart.items) {
-      const product = await Product.findById(item.product);
-      if (product) {
-        product.quantity -= item.quantity;
-        product.sold += item.quantity;
-        await product.save();
-      }
-    }
+//           res.json({ ok: true });
+//         } else {
+//           res.status(500).send(error);
+//         }
+//       }
+//     );
 
-    // Clear the cart
-    cart.items = [];
-    cart.total = 0;
-    await cart.save();
+//     // Decrement product quantity And Increment Sold
+//     for (const item of cart.items) {
+//       const product = await Product.findById(item.product);
+//       if (product) {
+//         product.quantity -= item.quantity;
+//         product.sold += item.quantity;
+//         await product.save();
+//       }
+//     }
 
-    return res.status(200).json(order);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server Error' });
-  }
-};
+//     // Clear the cart
+//     cart.items = [];
+//     cart.total = 0;
+//     await cart.save();
+
+//     return res.status(200).json(order);
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ message: 'Server Error' });
+//   }
+// };
+
+
+// exports.checkout = async (req, res) => {
+//   try {
+//     const { shippingFee, shippingMethod, tax, nonce } = req.body;
+//     const cart = await Cart.findOne({ user: req.user._id });
+//     if (!cart) {
+//       return res.status(404).json({ message: 'Cart not found' });
+//     }
+
+//     if (cart.items.length === 0) {
+//       return res.status(400).json({ message: 'Cart is empty' });
+//     }
+
+//     const result = await gateway.transaction.sale({
+//       amount: cart.total,
+//       paymentMethodNonce: nonce,
+//       customerId: req.user._id,
+//       shipping: {
+//         amount: shippingFee,
+//         name: 'Shipping',
+//         description: shippingMethod
+//       },
+//       taxAmount: tax,
+//       options: {
+//         submitForSettlement: true
+//       }
+//     });
+
+//     if (result.success) {
+//       // Decrement product quantity And Increment Sold
+//       for (const item of cart.items) {
+//         const product = await Product.findById(item.product);
+//         if (product) {
+//           product.quantity -= item.quantity;
+//           product.sold += item.quantity;
+//           await product.save();
+//         }
+//       }
+
+//       // Clear the cart
+//       cart.items = [];
+//       cart.total = 0;
+//       await cart.save();
+
+//       // Create an order
+//       const orderProducts = cart.items.map(item => ({
+//         product: item.product,
+//         quantity: item.quantity
+//       }));
+//       const order = new Order({
+//         buyer: req.user._id,
+//         products: orderProducts,
+//         payment: {
+//           id: result.transaction.id,
+//           amount: result.transaction.amount,
+//           currency: result.transaction.currencyIsoCode
+//         }
+//       });
+//       await order.save();
+
+//       return res.status(200).json(order);
+//     } else {
+//       return res.status(400).json({ message: 'Payment failed' });
+//     }
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ message: 'Server Error' });
+//   }
+// };
+
+// exports.checkout = async (req, res) => {
+//   try {
+//     const { paymentMethod, shippingFee, shippingMethod, tax } = req.body;
+//     const cart = await Cart.findOne({ user: req.user._id });
+//     if (!cart) {
+//       return res.status(404).json({ message: 'Cart not found' });
+//     }
+
+//     if (cart.items.length === 0) {
+//       return res.status(400).json({ message: 'Cart is empty' });
+//     }
+
+//     // Create an order
+//     const order = new Order({
+//       user: req.user._id,
+//       products: cart.items,
+//       total: cart.total,
+//       paymentMethod,
+//       shippingFee,
+//       shippingMethod,
+//       tax,
+//     });
+//     await order.save();
+
+//     // Decrement product quantity And Increment Sold
+//     for (const item of cart.items) {
+//       const product = await Product.findById(item.product);
+//       if (product) {
+//         product.quantity -= item.quantity;
+//         product.sold += item.quantity;
+//         await product.save();
+//       }
+//     }
+
+//     // Clear the cart
+//     cart.items = [];
+//     cart.total = 0;
+//     await cart.save();
+
+//     return res.status(200).json(order);
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ message: 'Server Error' });
+//   }
+// };

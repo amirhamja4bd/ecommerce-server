@@ -1,4 +1,5 @@
 const User = require("../models/UserModel");
+const Address = require("../models/AddressModel");
 const jwt = require("jsonwebtoken");
 const { hashPassword, comparePassword } = require("../helpers/authHelper");
 const OTPModel = require("../models/otpModel");
@@ -8,7 +9,7 @@ const fs =require("fs");
 
 exports.register = async (req, res )=> {
     try {
-    const {firstName, lastName, phone , email , password } = req.body;
+    const {firstName, lastName, phone , email , password ,photo} = req.body;
 
     if(!firstName.trim()){
         return res.json({error: "First Name is Required"})
@@ -35,7 +36,7 @@ exports.register = async (req, res )=> {
 
     const fullName = firstName + ' ' + lastName 
 
-    const user = await new User({ firstName, lastName, fullName : fullName, phone , email , password : hashedPassword}).save();
+    const user = await new User({ firstName, lastName, fullName : fullName, phone , email , password : hashedPassword ,photo}).save();
 
     const token = jwt.sign({ _id: user._id , email: user.email }, process.env.JWT_SECRET_KEY,{ expiresIn: "7d"});
     
@@ -72,7 +73,7 @@ exports.login = async (req, res ) =>{
     if(!match){
         return res.json({error:"Wrong password"})
     }
-    const token = jwt.sign({ _id: user._id , email: user.email, role: user.role, photo: user.photo  , role: user.role }, process.env.JWT_SECRET_KEY, { expiresIn: "7d", } );
+    const token = jwt.sign({ _id: user._id , email: user.email, role: user.role, photo: user.photo  }, process.env.JWT_SECRET_KEY, { expiresIn: "7d", } );
     
     res.json({
         user: {
@@ -83,7 +84,6 @@ exports.login = async (req, res ) =>{
             email: user.email,
             photo: user.photo,
             role: user.role,
-
         },
         token
     });
@@ -96,25 +96,22 @@ exports.login = async (req, res ) =>{
 // Profile Update
 exports.profileUpdate = async (req, res) => {
     try{
-        const { firstName, lastName, password} = req.fields;
+        const { firstName, lastName } = req.fields;
         const { photo } = req.files;
         const user = await User.findById(req.user._id);
         // check password length
-        if (password && password.length < 6){
-            return res.json({ error:"Password is required and must be at least 6 characters", });
-        }
-        // hash the password
-        const hashedPassword = password ? await hashPassword(password) : user.password ;
-    
+
         const fullName = firstName + ' ' + lastName 
         const updated = await User.findByIdAndUpdate(req.user._id, 
-            { ...req.fields, fullName, password: hashedPassword }, {new: true} );
+            { ...req.fields, fullName }, {new: true} );
 
             if (photo) {
                 updated.photo.data = fs.readFileSync(photo.path);
                 updated.photo.contentType = photo.type;   
             }
+            await updated.save();
             updated.password = undefined;
+            updated.address = undefined;
             res.json(updated);
     }
     catch(error){
@@ -122,44 +119,33 @@ exports.profileUpdate = async (req, res) => {
     }
 }
 
-// exports.profileUpdate = async (req, res) => {
-//     try{
-//         const { firstName, lastName, password, phone , address} = req.body;
-//         const user = await User.findById(req.user._id);
-//         // check password length
-//         if (password && password.length < 6){
-//             return res.json({ error:"Password is required and must be at least 6 characters", });
-//         }
-//         // hash the password
-//         const hashedPassword = password ? await hashPassword(password) : undefined;
-
-//         const updated = await User.findByIdAndUpdate(req.user._id, 
-//             {
-//                 firstName: firstName || user.firstName,
-//                 lastName: lastName || user.lastName,
-//                 phone: phone || user.phone,
-//                 password: hashedPassword || user.password,
-//                 address: address || user.address['address']
-//             }, {new: true}
-//             );
-
-//             updated.password = undefined;
-//             res.json(updated);
-//     }
-//     catch(error){
-//         console.log(error);
-//     }
-// }
+exports.password = async (req, res) => {
+    try {
+      const password = req.fields?.password;
+      
+      if (!password) {
+        return res.json({ error: "Password is required" });
+      }
+      if (password.length < 6) {
+        return res.json({ error: "Password must be at least 6 characters" });
+      }
+      const hashedPassword = await hashPassword(password);
+      const updated = await User.findByIdAndUpdate(req.user._id, { password: hashedPassword }, { new: true });
+      res.json(updated);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
 exports.getUser = async (req, res) => {
     try {
-      const user = await User.findOne({ user: req.user._id});
+      const user = await User.findOne({ user: req.user._id}).select('-password');
       res.status(200).json(user);
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
   };
-
+  
 // Recover Verify Email
 exports.recoverVerifyEmail=async (req,res)=>{
     let email = req.params.email;
@@ -230,5 +216,21 @@ exports.recoverResetPass=async (req,res)=>{
     }
     catch (error) {
         res.status(400).json({status: "fail", data:error})
+    }
+}
+
+
+// Address Update 
+// Profile Update
+exports.addressUpdate = async (req, res) => {
+    try{
+        const updated = await User.findByIdAndUpdate(req.user._id, 
+            { ...req.fields, user: req.user._id }, {new: true} );
+
+            await updated.save();
+            res.json(updated);
+    }
+    catch(error){
+        console.log(error);
     }
 }

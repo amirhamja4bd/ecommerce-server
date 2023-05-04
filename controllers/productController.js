@@ -74,8 +74,8 @@ exports.duplicate = async (req, res) => {
 exports.list = async (req, res) => {
   try {
     const products = await Product.find({})
-      .populate("category")
-      .populate("brand")
+      .populate({ path: "category", select: "-photo" })
+      .populate({ path: "brand", select: "-photo" })
       .select("-photo")
       .limit(10)
       .sort({ createdAt: -1 });
@@ -91,8 +91,8 @@ exports.read = async (req, res) => {
   try {
     const product = await Product.findOne({ slug: req.params.slug })
       .select("-photo")
-      .populate("category")
-      .populate("brand")
+      .populate({ path: "category", select: "-photo" })
+      .populate({ path: "brand", select: "-photo" })
 
     res.json(product);
   } catch (err) {
@@ -169,26 +169,33 @@ exports.remove = async (req, res) => {
   }
 };
 
-
-
-
-
-
 // Products Filter
 exports.filterProducts = async (req, res) => {
 try {
-  const { minPrice, maxPrice, category, brand, bestSell, keyword, sort, page, perPage, } = req.query;
+  const {  page, perPage, } = req.query;
+  const { minPrice, maxPrice, category, brand, bestSell, sort, keyword} = req.body;
 
   const filter = {};
   if (minPrice && maxPrice) {
-    filter.price = { $gte: minPrice, $lte: maxPrice };
+    filter.price = { $gte: parseInt(minPrice), $lte: parseInt(maxPrice) };
+  } 
+  else if (minPrice) {
+    filter.price = { $gte: parseInt(minPrice) };
+  } 
+  else if (maxPrice) {
+    filter.price = { $lte: parseInt(maxPrice) };
   }
-  if (category) {
-    filter.category = category;
-  }
-  if (brand) {
-    filter.brand = brand;
-  }
+  // if (category && Array.isArray(category)) {
+  //   filter.category = { $in: category };
+  // } else if (category) {
+  //   filter.category = category;
+  // }
+  if (category.length > 0) {
+    filter.category = {$in: category}
+  };
+  if (brand.length > 0) {
+    filter.brand = {$in: brand}
+  };
   if (bestSell) {
     filter.sold = { $gte: 10 }; // Display products that have sold at least 10 units.
   }
@@ -223,13 +230,13 @@ try {
     .skip((page - 1) * perPage)
     .limit(perPage);
 
+    console.log("product",products)
   res.json({ products, totalPages });
 } catch (err) {
   console.error(err.message);
   res.status(500).send('Server Error');
 }
 };
-
 
 // Products Filtered
 exports.filteredProducts = async (req, res) => {

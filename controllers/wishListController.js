@@ -48,7 +48,7 @@ exports.list = async (req, res) => {
 exports.findByProductId = async (req, res) => {
   try {
     const { productId } = req.params;
-    const wishListItems = await WishList.find({ product: productId });
+    const wishListItems = await WishList.find({ productId });
     return res.status(200).json(wishListItems);
   } catch (error) {
     console.error(error);
@@ -58,13 +58,15 @@ exports.findByProductId = async (req, res) => {
 
 exports.deleteWish = async (req, res) => {
   try {
-    const { id } = req.params;
-    const deletedWishList = await WishList.findByIdAndDelete(id);
+    const user = req.user._id;
+    const { productId } = req.body;
+    const deletedWishList = await WishList.findOneAndDelete({ user, productId });
     if (!deletedWishList) {
-      return res.status(404).json({ message: 'WishItem not found' });
+      return res.status(404).json({ error: 'WishList not found' });
     }
-    res.status(200).json({ message: 'WishItem deleted successfully' });
+    return res.json(deletedWishList);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    return res.status(500).json({ error: 'Server error' });
   }
 };

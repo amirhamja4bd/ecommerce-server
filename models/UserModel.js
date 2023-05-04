@@ -41,8 +41,11 @@ const userSchema = new Schema(
         },
         photo: {
             type: String,
-            default: "https://cdn.ostad.app/images/default_avatar.png"
         },
+        // photo: {
+        //     data: Buffer,
+        //     contentType: String
+        // },
         address: {
             address: {
                 type: String,

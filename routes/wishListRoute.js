@@ -8,7 +8,7 @@ const router = express.Router();
 router.post("/create-wishlist", isSignIn, create);
 router.get("/wishlists", isSignIn, list);
 router.get("/wishlist/:productId", isSignIn, findByProductId);
-router.delete("/wishlist/:id", isSignIn, deleteWish);
+router.delete("/wishlist", isSignIn, deleteWish);
 
 
 

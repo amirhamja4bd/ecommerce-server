@@ -34,7 +34,7 @@ exports.create = async (req, res) => {
 
 exports.list = async (req, res) => {
   try {
-    const all = await Category.find({});
+    const all = await Category.find({}).select('-photo');
     res.json(all);
   } catch (err) {
     console.log(err);
@@ -44,7 +44,7 @@ exports.list = async (req, res) => {
 
 exports.read = async (req, res) => {
   try {
-    const category = await Category.findOne({ slug: req.params.slug });
+    const category = await Category.findOne({ slug: req.params.slug }).select('-photo');
     res.json(category);
   } catch (err) {
     console.log(err);
