@@ -19,10 +19,7 @@ app.use(helmet());
 // Routes Middleware
 readdirSync("./routes").map(r => app.use("/api/v1", require(`./routes/${r}`)))
 
-//Undefined Route Implementation
-app.use("*",(req, res)=>{
-    res.status(404).json({status: 'fail' ,data: "Route Undefined"});
-})
+
 
 app.get('/', (req, res)=>{
     res.status(200).send(`
@@ -36,6 +33,11 @@ app.get('/', (req, res)=>{
     `);
 });
 
+
+//Undefined Route Implementation
+app.use("*",(req, res)=>{
+    res.status(404).json({status: 'fail' ,data: "Route Undefined"});
+})
 // Server 
 const database = process.env.DATABASE_URL
 const port = process.env.PORT || 5000;
