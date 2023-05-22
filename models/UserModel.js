@@ -9,7 +9,9 @@ const userSchema = new Schema(
             trim:true,
             required:[true, "Email address is required"],
             unique: [true, "Unique Email is required"],
-            validate:[/^\S+@\S+\.\S+$/, "Provide a valid Email"],
+            lowercase: true,
+            // validate: [validator.isEmail, "Provide a valid Email"],
+            // validate:[/^\S+@\S+\.\S+$/, "Provide a valid Email"],
         },
         firstName:{
             type: String,
@@ -27,7 +29,8 @@ const userSchema = new Schema(
             type: String,
             trim:true,
             require: [true, "Phone number is required"],
-            match: [/^\d{11}$/ , "Provide Valid Bangladesh Mobile Number"]
+            // validate: [validator.isMobilePhone, "Provide a valid mobile number"],
+            // match: [/^\d{11}$/ , "Provide Valid Bangladesh Mobile Number"]
         },
         password:{
             type: String,
@@ -39,35 +42,36 @@ const userSchema = new Schema(
             type: Number,
             default: 0,
         },
-        photo: {
-            type: String,
-        },
         // photo: {
-        //     data: Buffer,
-        //     contentType: String
+        //     type: String,
         // },
-        address: {
-            address: {
-                type: String,
-                default: ""
-            },
-            city: {
-                type: String,
-                default: ""
-            },
-            state: {
-                type: String,
-                default: ""
-            },
-            country: {
-                type: String,
-                default: ""
-            },
-            zipCode: {
-                type: String,
-                default: ""
-            },
-        }
+        photo: {
+            data: Buffer,
+            contentType: String,
+            // require: [true, "Photo is required"],
+        },
+        // address: {
+        //     address: {
+        //         type: String,
+        //         default: ""
+        //     },
+        //     city: {
+        //         type: String,
+        //         default: ""
+        //     },
+        //     state: {
+        //         type: String,
+        //         default: ""
+        //     },
+        //     country: {
+        //         type: String,
+        //         default: ""
+        //     },
+        //     zipCode: {
+        //         type: String,
+        //         default: ""
+        //     },
+        // }
     }, {timestamps: true , versionKey: false}
 );
 

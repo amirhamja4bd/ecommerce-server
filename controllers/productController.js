@@ -77,7 +77,6 @@ exports.list = async (req, res) => {
       .populate({ path: "category", select: "-photo" })
       .populate({ path: "brand", select: "-photo" })
       .select("-photo")
-      .limit(10)
       .sort({ createdAt: -1 });
 
     res.json(products);
@@ -116,7 +115,7 @@ exports.photo = async (req, res) => {
   }
 };
 
-// Product Create
+// Product Update
 exports.update = async (req, res) => {
   try {
     const { title, description, quantity, category, price } = req.fields;

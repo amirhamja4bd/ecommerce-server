@@ -40,7 +40,7 @@ exports.checkout = async (req, res) => {
     if (cart.items.length === 0) {
       return res.status(400).json({ message: 'Cart is empty' });
     }
-
+    
     let newTransaction = gateway.transaction.sale(
       {
         // amount: carts.total ,
@@ -60,7 +60,7 @@ exports.checkout = async (req, res) => {
             // create order
             const order = new Order({
               user: req.user._id,
-              products: carts,
+              products: cart,
               total: result.transaction.amount,
               shippingFee: shippingFee,
               address: address,

@@ -6,9 +6,9 @@ const formidable =require("express-formidable");
 const router = express.Router();
 
 // User
-router.post('/register', register)
+router.post('/register', formidable() , register)
 router.post('/login', login)
-router.put('/profile', isSignIn ,  formidable(), profileUpdate)
+router.put('/profile', isSignIn , formidable(), profileUpdate)
 router.put('/password', isSignIn , formidable(), password)
 router.get('/user', isSignIn , getUser)
 

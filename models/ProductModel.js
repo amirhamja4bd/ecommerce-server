@@ -16,7 +16,7 @@ const productSchema = new Schema(
         description: {
             type: String,
             trim: true,
-            maxLength: 500,
+            maxLength: 5000,
         },
         slug: {
             type: String,
