@@ -2,7 +2,7 @@ const User = require("../models/UserModel");
 const Address = require("../models/AddressModel");
 const jwt = require("jsonwebtoken");
 const { hashPassword, comparePassword } = require("../helpers/authHelper");
-const OTPModel = require("../models/otpModel");
+const OTPModel = require("../models/OtpModel");
 const SendEmailUtility = require("../utility/SendEmailUtility");
 require("dotenv").config;
 const fs =require("fs");
