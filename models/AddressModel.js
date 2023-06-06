@@ -9,12 +9,10 @@ const addressSchema = new Schema(
         },
         city: {
             type: String,
-            unique: true,
             required: true
         },
         state: {
             type: String,
-            unique: true,
             required: true
         },
         country: {
@@ -23,7 +21,6 @@ const addressSchema = new Schema(
         },
         zipCode: {
             type: String,
-            unique: true,
             required: true
         },
         fullName: {

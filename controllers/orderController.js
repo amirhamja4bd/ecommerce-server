@@ -59,9 +59,15 @@ exports.checkout = async (req, res) => {
           try {
             // create order
             const order = new Order({
-              user: req.user._id,
-              products: cart,
-              total: result.transaction.amount,
+              user: cart.user,
+              products: cart.items.map((item) => ({
+                product: item.product,
+                quantity: item.quantity,
+                price: item.price,
+              })),
+              total: cart.total,
+              paymentStatus: result.transaction.status,
+              // total: result.transaction.amount,
               shippingFee: shippingFee,
               address: address,
               paymentMethod: result.transaction.paymentInstrumentType,
@@ -84,6 +90,7 @@ exports.checkout = async (req, res) => {
             // Clear the cart
             cart.items = [];
             cart.total = 0;
+            cart.couponApplied = false;
             
             await cart.save();
             }
@@ -139,12 +146,13 @@ exports.orderStatus = async (req, res) => {
 // Handle GET request for retrieving all orders
 exports.getOrders = async (req, res, next) => {
     try {
-      const orders = await Order.find().populate("user", "-password");
+      const orders = await Order.find().populate("user", "-password").populate("products.product");
       res.status(200).json(orders);
     } catch (err) {
       next(err);
     }
   };
+
   
   // Handle GET request for retrieving a single order by ID
   exports.getOrderById = async (req, res, next) => {

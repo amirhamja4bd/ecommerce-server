@@ -64,6 +64,12 @@ const productSchema = new Schema(
                 ref: 'Category',
             }
         ],
+        type: {
+            type: String,
+            required: true,
+            enum: ["feature", "sale", "new", "bestdeal"],
+            default: "",
+          },
 
     }, {timestamps: true , versionKey: false}
 );

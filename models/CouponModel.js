@@ -23,18 +23,16 @@ const couponSchema = new mongoose.Schema(
     },
     expirationDate: {
       type: Date,
-      // required: true,
+      required: true,
     },
     usageLimit: {
       type: Number,
       default: 1,
     },
-    applicableProducts: [
-      {
-        type: String,
-        default : "all",
-      },
-    ],
+    applicableProducts: {
+      type: [String],
+      default: ["all"],
+    },
     conditions: {
       type: String,
     },

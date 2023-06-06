@@ -75,6 +75,10 @@ const cartItemSchema = new Schema({
   price: {
     type: Number,
     required: true
+  },
+  totalPrice: {
+    type: Number,
+    required: true
   }
 }, {timestamps: true , versionKey: false});
 
@@ -90,14 +94,19 @@ const cartSchema = new Schema({
     required: true,
     default: 0
   },
+  couponApplied: {
+    type: Boolean,
+    default: false,
+  },
+
 }, {timestamps: true , versionKey: false});
 
 cartSchema.methods.calculateSubTotal = function() {
-  let subTotal = 0;
+  let grandTotal = 0;
   for (let item of this.items) {
-    subTotal += item.price * item.quantity;
+    grandTotal += item.price * item.quantity;
   }
-  this.total = subTotal;
+  this.total = grandTotal;
 };
 
 const Cart = mongoose.model('Cart', cartSchema);

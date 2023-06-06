@@ -2,6 +2,7 @@ const fs =require("fs");
 const slugify =require("slugify");
 const Product = require("../models/ProductModel");
 const mongoose = require("mongoose");
+const Review = require("../models/ReviewModel");
 
 // Product Create
 exports.create = async (req, res) => {
@@ -321,3 +322,24 @@ exports.relatedProducts = async (req, res) => {
     console.log(err);
   }
 };
+
+// getMostReviewedProducts
+exports.getMostReviewedProducts = async (req, res) => {
+  try {
+    const mostReviewedProducts = await Review.aggregate([
+      { $group: { _id: "$product", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
+
+    const productIds = mostReviewedProducts.map(item => item._id);
+
+    const products = await Product.find({ _id: { $in: productIds } }).select("-photo");
+
+    res.json(products);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+

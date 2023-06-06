@@ -13,6 +13,7 @@ router.put('/password', isSignIn , formidable(), password)
 router.get('/user', isSignIn , getUser)
 
 // Password Forgot
+router.get("/user/photo/:userId", photo);
 router.get('/recover-verify-email/:email', recoverVerifyEmail)
 router.get('/recover-verify-otp/:email/:otp', recoverVerifyOTP)
 router.post('/recover-reset-password', recoverResetPass)

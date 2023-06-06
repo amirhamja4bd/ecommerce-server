@@ -1,5 +1,5 @@
 const express = require('express');
-const { create, list, read, photo, update, remove, filteredProducts, listProducts, productsSearch , relatedProducts, productsCount, duplicate, filterProducts } = require('../controllers/productController');
+const { create, list, read, photo, update, remove, filteredProducts, listProducts, productsSearch , relatedProducts, productsCount, duplicate, filterProducts, getMostReviewedProducts } = require('../controllers/productController');
 const { isAdmin, isSignIn } = require('../middlewares/authMiddleware');
 const formidable =require("express-formidable");
 
@@ -19,6 +19,7 @@ router.get("/products-count", productsCount);
 router.get("/list-products/:page", listProducts);
 router.get("/products/search/:keyword", productsSearch);
 router.get("/related-products/:productId/:categoryId", relatedProducts);
+router.get("/products/reviews", getMostReviewedProducts);
 
 
 

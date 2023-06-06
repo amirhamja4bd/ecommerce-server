@@ -7,11 +7,28 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
       // required: true,
     },
-    products: [{ 
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: "Product" ,
-      required: true,
-    }],
+    // products: [{ 
+    //   type: mongoose.Schema.Types.ObjectId, 
+    //   ref: "Product" ,
+    //   required: true,
+    // }],
+    products: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+        },
+        price: {
+          type: Number,
+          required: true,
+        },
+      },
+    ],
     
     total: {
       type: Number,
@@ -29,8 +46,6 @@ const orderSchema = new mongoose.Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["paid", "unpaid"],
-      default: "unpaid",
     },
 
     shippingMethod: {

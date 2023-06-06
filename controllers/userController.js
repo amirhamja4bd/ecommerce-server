@@ -123,6 +123,21 @@ exports.login = async (req, res ) =>{
     }
 };
 
+exports.photo = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).select(
+      "photo"
+    );
+    if (user.photo.data) {
+      res.set("Content-Type", user.photo.contentType);
+      res.set("Cross-Origin-Resource-Policy", "cross-origin")
+      return res.send(user.photo.data);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 // Profile Update
 // exports.profileUpdate = async (req, res) => {
 //     try{
