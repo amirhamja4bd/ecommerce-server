@@ -8,12 +8,9 @@
   ],
   "routes": [
     {
-      "src": "/api/v1/(.*)",
-      "dest": "server.js"
-    },
-    {
       "src": "/(.*)",
-      "dest": "server.js"
+      "dest": "server.js" ,
+      "methods": ["GET" , "POST" , "PUT" , "PATCH" , "DELETE" , "OPTIONS"]
     }
   ]
 }
