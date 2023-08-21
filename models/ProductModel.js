@@ -70,6 +70,10 @@ const productSchema = new Schema(
             enum: ["feature", "sale", "new", "bestdeal"],
             default: "",
           },
+          reviewCount: {
+            type: Number,
+            default: 0,
+          }
 
     }, {timestamps: true , versionKey: false}
 );

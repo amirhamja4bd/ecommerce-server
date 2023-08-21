@@ -1,5 +1,6 @@
 const Review = require("../models/ReviewModel");
 const Order = require("../models/OrderModel");
+const Product = require("../models/ProductModel");
 
 exports.create = async (req, res) => {
     try {
@@ -20,6 +21,13 @@ exports.create = async (req, res) => {
       const review = new Review({ ...req.body, product: productId,  user: userId });
         
       const reviewDoc = await review.save();
+
+      // const newProduct = await Product.findById( { _id: productId } );
+      // if (newProduct) {
+      //   newProduct.reviewCount += 1;
+      //   await newProduct.save();
+      // }
+      await Product.findOneAndUpdate( { _id: productId }, { $inc: { reviewCount: +1 } }, {new: true} );
   
       res.status(200).json({
         success: true,
@@ -115,7 +123,13 @@ exports.deleteReview = async (req, res) => {
     if (!deletedReview) {
       return res.status(404).json({ message: 'Review not found' });
     }
+    else{
     res.status(200).json({ message: 'Review deleted successfully' });
+    
+    await Product.findOneAndUpdate( id, { $inc: { reviewCount: -1 } }, {new: true} );
+
+    }
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -118,9 +118,7 @@ exports.orderStatus = async (req, res) => {
     const order = await Order.findByIdAndUpdate( orderId, { status },
       { new: true }
     ).populate("user", "email name");
-    // send email
-
-    // prepare email
+    // send email // prepare email
     const emailData = {
       from: process.env.EMAIL_FROM,
       to: order.user.email,
